@@ -12,7 +12,7 @@ fi
 ACILABS_SCRIPTS="$(ls ./acilabs_scripts/)"
 if [ -z "$ACILABS_SCRIPTS" ]
 then
-    echo -e "Error: missing akslabs scripts...\n"
+    echo -e "Error: missing acilabs scripts...\n"
     exit 5
 fi
 

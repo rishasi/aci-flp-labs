@@ -18,7 +18,7 @@ jobs:
         sudo apt-get update && sudo apt-get install shc -y
     - name: Create new binary using script
       run: |
-        rm -f aci-flp-labs_binaries/*
+        rm -f acilabs_binaries/*
         bash shc_script_converter.sh
     - name: Login to Docker Registry
       run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
