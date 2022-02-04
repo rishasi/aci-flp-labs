@@ -23,7 +23,7 @@ function convert_to_binary() {
     rm -f ./acilabs_scripts/${SCRIPT_NAME}.x.c > /dev/null 2>&1
 }
 
-for FILE in $(echo "$acilabs_SCRIPTS")
+for FILE in $(echo "$ACILABS_SCRIPTS")
 do
     convert_to_binary $FILE
 done
