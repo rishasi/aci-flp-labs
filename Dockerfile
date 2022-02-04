@@ -10,6 +10,6 @@ RUN apt-get update && apt-get install bash-completion apt-transport-https gnupg 
 
 COPY ./bashrc /root/.bashrc
 
-COPY ./akslabs_binaries/* /usr/local/bin/
+COPY ./acilabs_binaries/* /usr/local/bin/
 
 CMD ["/bin/bash"]
