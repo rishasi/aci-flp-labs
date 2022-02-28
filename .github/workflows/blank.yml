@@ -25,10 +25,10 @@ jobs:
     - name: Get the version
       run: echo TAG_ID=${GITHUB_REF:10} >> $GITHUB_ENV
     - name: Build the tagged Docker image
-      run: docker build . --file Dockerfile -t sturrent/aci-flp-labs:"${TAG_ID}"
+      run: docker build . --file Dockerfile -t rishasi/aci-flp-labs:"${TAG_ID}"
     - name: Push the tagged Docker image
-      run: docker push sturrent/aci-flp-labs:"${TAG_ID}"
+      run: docker push rishasi/aci-flp-labs:"${TAG_ID}"
     - name: Tag the latest Docker image
-      run: docker tag sturrent/aci-flp-labs:"${TAG_ID}" sturrent/aci-flp-labs:latest
+      run: docker tag rishasi/aci-flp-labs:"${TAG_ID}" rishasi/aci-flp-labs:latest
     - name: Push the latest Docker image
-      run: docker push sturrent/aci-flp-labs:latest
+      run: docker push rishasi/aci-flp-labs:latest
