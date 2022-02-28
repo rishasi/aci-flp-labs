@@ -268,17 +268,18 @@ function lab_scenario_3 () {
     ERROR_MESSAGE="$(curl $PUBLIC_IP:$PORT 2>&1)"
     
     echo -e "\n\n************************************************************************\n"
-    echo -e "\n--> Issue description: \n Customer has an ACI already deployed in the resource group $RESOURCE_GROUP \n"
+    echo -e "\n--> \nIssue description: \n Customer has an ACI already deployed in the resource group $RESOURCE_GROUP\n"
     echo -e "Customer created the Constinaer Instance using the command:"
     echo -e "az container create -g <aci_rg> -n <aci_name> --image mcr.microsoft.com/azuredocs/aci-helloworld --ports 8080\n"
     echo -e "But, the customer is not able to access the Instance using the Public IP and Port. Cx is getting the error message:"
     echo -e "\n-------------------------------------------------------------------------------------\n"
     echo -e "$ERROR_MESSAGE"
+    echo -e "\n¯\_(ツ)_/¯"
     echo -e "\n-------------------------------------------------------------------------------------\n"
     echo -e "Check the logs for the Container instance using the \"az container logs -n <aci_name> -g <aci_rg>\". Then, verify the Networking configuration of the Container Instance on the Portal and see if there is any mis-configuration.\n"
     echo -e "Once you find the issue, update the Constinaer Instance using the command:"
-    echo -e "\n az container create -g <aci_rg> -n <aci_name> --image <aci_image> --ports <required_port>\n"
-    echo -e "\n Note that in order to update a specific property of an existing Container Instance, all other properties should be same. For reference: https://docs.microsoft.com/en-us/azure/container-instances/container-instances-update#update-a-container-group\n"
+    echo -e "\naz container create -g <aci_rg> -n <aci_name> --image <aci_image> --ports <required_port>\n"
+    echo -e "\nNote that in order to update a specific property of an existing Container Instance, all other properties should be same. For reference: https://docs.microsoft.com/en-us/azure/container-instances/container-instances-update#update-a-container-group\n"
 }
 
 function lab_scenario_3_validation () {
