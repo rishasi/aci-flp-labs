@@ -290,7 +290,7 @@ function lab_scenario_3_validation () {
     validate_aci_exists $RESOURCE_GROUP $ACI_NAME
 
     UPDATED_PORT=$(az container show -g $RESOURCE_GROUP -n $ACI_NAME --query ipAddress.ports[].port -o tsv)
-    if [ $UPDATES_PORT -eq 80 ]
+    if [ $UPDATED_PORT -eq 80 ]
     then
         echo -e "\n\n========================================================"
         echo -e '\nContainer instance looks good now!\n'
