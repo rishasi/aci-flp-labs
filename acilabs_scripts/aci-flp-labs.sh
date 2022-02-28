@@ -258,12 +258,14 @@ function lab_scenario_3 () {
     --image mcr.microsoft.com/azuredocs/aci-helloworld \
     --ip-address Public \
     --ports 8080 \
-    -o table
+    -o table &>/dev/null 
+
+
 
     validate_aci_exists $RESOURCE_GROUP $ACI_NAME
     
-    PUBLIC_IP=$(az container show -g $RESOURCE_GROUP -n $ACI_NAME --query ipAddress.ip -o tsv)
-    PORT=$(az container show -g $RESOURCE_GROUP -n $ACI_NAME --query ipAddress.ports[].port -o tsv)
+    PUBLIC_IP=$(az container show -g $RESOURCE_GROUP -n $ACI_NAME --query ipAddress.ip -o tsv 2>/dev/null)
+    PORT=$(az container show -g $RESOURCE_GROUP -n $ACI_NAME --query ipAddress.ports[].port -o tsv 2>/dev/null)
 
     ERROR_MESSAGE="$(curl $PUBLIC_IP:$PORT 2>&1)"
     
@@ -296,7 +298,7 @@ function lab_scenario_3_validation () {
         echo -e "\n--> Error: Scenario $LAB_SCENARIO is still FAILED\n\n"
         echo -e "Check the logs for the Container instance using the \"az container logs -n <aci_name> -g <aci_rg>\". Then, verify the Networking configuration of the Container Instance on the Portal and see if there is any mis-configuration.\n"
         echo -e "Once you find the issue, update the Constinaer Instance using the command:"
-        echo -e "\n az container create -g <aci_rg> -n <aci_name> --image <aci_image> --ports <required_port>\n"
+        echo -e "\n az container create -g <aci_rg> -n <aci_name> --image <aci_image> --ip-address Public --ports <required_port>\n"
         echo -e "\n Note that in order to update a specific property of an existing Container Instance, all other properties should be same. For reference: https://docs.microsoft.com/en-us/azure/container-instances/container-instances-update#update-a-container-group\n"
     fi
 }
