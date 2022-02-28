@@ -256,7 +256,8 @@ function lab_scenario_3 () {
     --name $ACI_NAME \
     --resource-group $RESOURCE_GROUP \
     --image mcr.microsoft.com/azuredocs/aci-helloworld \
-    --ports 8080
+    --ip-address Public \
+    --ports 8080 \
     -o table
 
     validate_aci_exists $RESOURCE_GROUP $ACI_NAME
