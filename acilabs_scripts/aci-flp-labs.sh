@@ -249,52 +249,89 @@ function lab_scenario_3 () {
     ACI_NAME=aci-labs-ex${LAB_SCENARIO}-${USER_ALIAS}
     RESOURCE_GROUP=aci-labs-ex${LAB_SCENARIO}-rg-${USER_ALIAS}
     check_resourcegroup_cluster $RESOURCE_GROUP $ACI_NAME
+
+    echo -e "\n--> Deploying resources for lab${LAB_SCENARIO}...\n"
+
+    az container create \
+    --name $ACI_NAME \
+    --resource-group $RESOURCE_GROUP \
+    --image mcr.microsoft.com/azuredocs/aci-helloworld \
+    --ports 8080
+    -o table
+
+    validate_aci_exists $RESOURCE_GROUP $ACI_NAME
     
-    echo -e "\n--> Deploying cluster for lab${LAB_SCENARIO}...\n"
+    PUBLIC_IP=$(az container show -g $RESOURCE_GROUP -n $ACI_NAME --query ipAddress.ip -o tsv)
+    PORT=$(az container show -g $RESOURCE_GROUP -n $ACI_NAME --query ipAddress.ports[].port -o tsv)
+
+    ERROR_MESSAGE="$(curl $PUBLIC_IP:$PORT 2>&1)"
     
-    echo -e "\n\n********************************************************"
-    echo -e "\n--> Issue description: \n ... \n"
+    echo -e "\n\n************************************************************************\n"
+    echo -e "\n--> Issue description: \n Customer has an ACI already deployed in the resource group $RESOURCE_GROUP \n"
+    echo -e "Customer created the Constinaer Instance using the command:"
+    echo -e "az container create -g <aci_rg> -n <aci_name> --image mcr.microsoft.com/azuredocs/aci-helloworld --ports 8080\n"
+    echo -e "But, the customer is not able to access the Instance using the Public IP and Port. Cx is getting the error message:"
+    echo -e "\n-------------------------------------------------------------------------------------\n"
+    echo -e "$ERROR_MESSAGE"
+    echo -e "\n-------------------------------------------------------------------------------------\n"
+    echo -e "Check the logs for the Container instance using the \"az container logs -n <aci_name> -g <aci_rg>\". Then, verify the Networking configuration of the Container Instance on the Portal and see if there is any mis-configuration.\n"
+    echo -e "Once you find the issue, update the Constinaer Instance using the command:"
+    echo -e "\n az container create -g <aci_rg> -n <aci_name> --image <aci_image> --ports <required_port>\n"
+    echo -e "\n Note that in order to update a specific property of an existing Container Instance, all other properties should be same. For reference: https://docs.microsoft.com/en-us/azure/container-instances/container-instances-update#update-a-container-group\n"
 }
 
 function lab_scenario_3_validation () {
-ACI_NAME=aci-labs-ex${LAB_SCENARIO}-${USER_ALIAS}
+    ACI_NAME=aci-labs-ex${LAB_SCENARIO}-${USER_ALIAS}
     RESOURCE_GROUP=aci-labs-ex${LAB_SCENARIO}-rg-${USER_ALIAS}
     validate_aci_exists $RESOURCE_GROUP $ACI_NAME
+
+    UPDATED_PORT=$(az container show -g $RESOURCE_GROUP -n $ACI_NAME --query ipAddress.ports[].port -o tsv)
+    if [ $UPDATES_PORT -eq 80 ]
+    then
+        echo -e "\n\n========================================================"
+        echo -e '\nContainer instance looks good now!\n'
+    else
+        echo -e "\n--> Error: Scenario $LAB_SCENARIO is still FAILED\n\n"
+        echo -e "Check the logs for the Container instance using the \"az container logs -n <aci_name> -g <aci_rg>\". Then, verify the Networking configuration of the Container Instance on the Portal and see if there is any mis-configuration.\n"
+        echo -e "Once you find the issue, update the Constinaer Instance using the command:"
+        echo -e "\n az container create -g <aci_rg> -n <aci_name> --image <aci_image> --ports <required_port>\n"
+        echo -e "\n Note that in order to update a specific property of an existing Container Instance, all other properties should be same. For reference: https://docs.microsoft.com/en-us/azure/container-instances/container-instances-update#update-a-container-group\n"
+    fi
 }
 
 #if -h | --help option is selected usage will be displayed
 if [ $HELP -eq 1 ]
 then
-	print_usage_text
+    print_usage_text
     echo -e '"-l|--lab" Lab scenario to deploy (3 possible options)
 "-r|--region" region to create the resources
 "--version" print version of aci-flp-labs
 "-h|--help" help info\n'
-	exit 0
+    exit 0
 fi
 
 if [ $VERSION -eq 1 ]
 then
-	echo -e "$SCRIPT_VERSION\n"
-	exit 0
+    echo -e "$SCRIPT_VERSION\n"
+    exit 0
 fi
 
 if [ -z $LAB_SCENARIO ]; then
-	echo -e "\n--> Error: Lab scenario value must be provided. \n"
-	print_usage_text
-	exit 9
+    echo -e "\n--> Error: Lab scenario value must be provided. \n"
+    print_usage_text
+    exit 9
 fi
 
 if [ -z $USER_ALIAS ]; then
-	echo -e "Error: User alias value must be provided. \n"
-	print_usage_text
-	exit 10
+    echo -e "Error: User alias value must be provided. \n"
+    print_usage_text
+    exit 10
 fi
 
 # lab scenario has a valid option
-if [[ ! $LAB_SCENARIO =~ ^[1-2]+$ ]];
+if [[ ! $LAB_SCENARIO =~ ^[1-3]+$ ]];
 then
-    echo -e "\n--> Error: invalid value for lab scenario '-l $LAB_SCENARIO'\nIt must be value from 1 to 2\n"
+    echo -e "\n--> Error: invalid value for lab scenario '-l $LAB_SCENARIO'\nIt must be value from 1 to 3\n"
     exit 11
 fi
 
