@@ -363,7 +363,7 @@ function lab_scenario_4 () {
 
     
     echo -e "\n\n************************************************************************\n"
-    echo -e "\n--> \nIssue description: \n Customer has 2 Container Instances deployed in different Subnets of the same VNet in resource group $RESOURCE_GROUP. However, the Client ACI $CLIENT_ACI_NAME, is not able to access the Server ACI $ACI_NAME.\n"
+    echo -e "\n--> \nIssue description: \nCustomer has 2 Container Instances deployed in different Subnets of the same VNet in resource group $RESOURCE_GROUP. However, the Client ACI is not able to access the Server ACI.\n"
 
     echo -e "Cx is getting the error message:"
     echo -e "\n-------------------------------------------------------------------------------------\n"
@@ -388,7 +388,7 @@ function lab_scenario_4_validation () {
     else
         echo -e "\n--> Error: Scenario $LAB_SCENARIO is still FAILED\n\n"
         echo -e "Check the logs for the Container instance using the \"az container logs -n <aci_name> -g <aci_rg>\". Then, verify the Networking configuration of the Server/Client ACI on the Portal and see if there is any mis-configuration.\n"
-        echo -e "\nHint: that both of the Container Instances are Private, and are deployed inside a Virtual Network. Link: https://docs.microsoft.com/en-us/azure/container-instances/container-instances-virtual-network-concepts#scenarios\n"
+        echo -e "\nHint: Both of the Container Instances are Private, and are deployed inside a Virtual Network. Link: https://docs.microsoft.com/en-us/azure/container-instances/container-instances-virtual-network-concepts#scenarios\n"
     fi
 }
 
@@ -436,7 +436,7 @@ function lab_scenario_5 () {
 
     
     echo -e "\n\n************************************************************************\n"
-    echo -e "\n--> \nIssue description: \n Customer has 2 Container Instances deployed in different Subnets of the same VNet in resource group $RESOURCE_GROUP. However, the Client ACI $CLIENT_ACI_NAME, is not able to access the Server ACI $ACI_NAME.\n"
+    echo -e "\n--> \nIssue description: \nCustomer has 2 Container Instances deployed in different Subnets of different VNets in resource group $RESOURCE_GROUP. However, the Client ACI is not able to access the Server ACI\n"
 
     echo -e "Cx is getting the error message:"
     echo -e "\n-------------------------------------------------------------------------------------\n"
