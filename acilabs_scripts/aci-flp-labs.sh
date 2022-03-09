@@ -550,11 +550,11 @@ then
 elif [ $LAB_SCENARIO -eq 5 ] && [ $VALIDATE -eq 0 ]
 then
     check_resourcegroup_cluster
-    lab_scenario_4
+    lab_scenario_5
 
 elif [ $LAB_SCENARIO -eq 5 ] && [ $VALIDATE -eq 1 ]
 then
-    lab_scenario_4_validation
+    lab_scenario_5_validation
 
 else
     echo -e "\n--> Error: no valid option provided\n"
