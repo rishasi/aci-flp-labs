@@ -21,6 +21,7 @@ Here is the list of current labs available:
 *        1. ACI deployment on existing resource group fails
 *        2. ACI deployed with wrong image
 *        3. ACI not accessible using PublicIP:Port
+*        4. ACI not accessible from another Subnet.
 *************************************************************************************
 
 "-l|--lab" Lab scenario to deploy (3 possible options)
