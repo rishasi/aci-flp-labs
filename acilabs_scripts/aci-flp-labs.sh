@@ -376,10 +376,11 @@ function lab_scenario_4 () {
 
 function lab_scenario_4_validation () {
     ACI_NAME=aci-labs-ex${LAB_SCENARIO}-${USER_ALIAS}
+    CLIENT_ACI_NAME=${ACI_NAME}-client
     RESOURCE_GROUP=aci-labs-ex${LAB_SCENARIO}-rg-${USER_ALIAS}
-    validate_aci_exists $RESOURCE_GROUP $ACI_NAME
+    validate_aci_exists $RESOURCE_GROUP $CLIENT_ACI_NAME
 
-    CLIENT_LOGS=$(az container logs --resource-group $RESOURCE_GROUP --name $ACI_NAME-client | tail -3 > client-logs)
+    CLIENT_LOGS=$(az container logs --resource-group $RESOURCE_GROUP --name $CLIENT_ACI_NAME | tail -3)
     if echo $CLIENT_LOGS | grep -i 'remote file exists' &>/dev/null
     then
         echo -e "\n\n========================================================"
