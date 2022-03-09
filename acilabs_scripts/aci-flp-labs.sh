@@ -306,6 +306,7 @@ function lab_scenario_3_validation () {
 # Lab scenario 4
 function lab_scenario_4 () {
     ACI_NAME=aci-labs-ex${LAB_SCENARIO}-${USER_ALIAS}
+    CLIENT_ACI_NAME=${ACI_NAME}-client
     RESOURCE_GROUP=aci-labs-ex${LAB_SCENARIO}-rg-${USER_ALIAS}
     check_resourcegroup_cluster $RESOURCE_GROUP $ACI_NAME
 
@@ -349,20 +350,20 @@ function lab_scenario_4 () {
 
     SERVER_IP=$(az container show --resource-group $RESOURCE_GROUP --name $ACI_NAME --query ipAddress.ip --output tsv 2>/dev/null)
 
-    az container create --name $ACI_NAME-client \
+    az container create --name ${ACI_NAME}-client \
     --resource-group $RESOURCE_GROUP --image alpine/curl \
     --command-line "/bin/sh -c 'while true; do wget -T 5 --spider $SERVER_IP; sleep 2; done'" \
     --vnet aci-vnet-${USER_ALIAS} --subnet client-subnet-${USER_ALIAS} &>/dev/null
 
-    validate_aci_exists $RESOURCE_GROUP $ACI_NAME-client
+    validate_aci_exists $RESOURCE_GROUP $CLIENT_ACI_NAME
 
     sleep 15
 
-    ERROR_MESSAGE=$(az container logs --resource-group $RESOURCE_GROUP --name $ACI_NAME-client | tail -3)
+    ERROR_MESSAGE=$(az container logs --resource-group $RESOURCE_GROUP --name $CLIENT_ACI_NAME | tail -3)
 
     
     echo -e "\n\n************************************************************************\n"
-    echo -e "\n--> \nIssue description: \n Customer has 2 Container Instances deployed in different Subnets of the same VNet in resource group $RESOURCE_GROUP. However, the Client ACI $ACI_NAME-client, is not able to access the Server ACI $ACI_NAME.\n"
+    echo -e "\n--> \nIssue description: \n Customer has 2 Container Instances deployed in different Subnets of the same VNet in resource group $RESOURCE_GROUP. However, the Client ACI $CLIENT_ACI_NAME, is not able to access the Server ACI $ACI_NAME.\n"
 
     echo -e "Cx is getting the error message:"
     echo -e "\n-------------------------------------------------------------------------------------\n"
