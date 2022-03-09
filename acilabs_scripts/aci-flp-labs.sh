@@ -392,6 +392,79 @@ function lab_scenario_4_validation () {
     fi
 }
 
+# Lab scenario 5
+function lab_scenario_5 () {
+    ACI_NAME=aci-labs-ex${LAB_SCENARIO}-${USER_ALIAS}
+    CLIENT_ACI_NAME=${ACI_NAME}-client
+    RESOURCE_GROUP=aci-labs-ex${LAB_SCENARIO}-rg-${USER_ALIAS}
+    check_resourcegroup_cluster $RESOURCE_GROUP $ACI_NAME
+
+    echo -e "\n--> Deploying resources for lab${LAB_SCENARIO}...\n"
+
+    # Create VNet and Subnet for ACI
+
+    az network vnet create --name aci-vnet-${USER_ALIAS} \
+    --resource-group $RESOURCE_GROUP --address-prefix 10.0.0.0/16 \
+    --subnet-name aci-subnet-${USER_ALIAS} --subnet-prefix 10.0.0.0/24 &>/dev/null 
+
+    # Create VNet and Subnet for Client ACI
+
+    az network vnet create --name client-vnet-${USER_ALIAS} \
+    --resource-group $RESOURCE_GROUP --address-prefix 10.1.0.0/16 \
+    --subnet-name client-subnet-${USER_ALIAS} --subnet-prefix 10.1.0.0/24 &>/dev/null 
+
+    # Create the Server ACI
+    az container create --name $ACI_NAME \
+    --resource-group $RESOURCE_GROUP --image mcr.microsoft.com/azuredocs/aci-helloworld \
+    --vnet aci-vnet-${USER_ALIAS} --subnet aci-subnet-${USER_ALIAS} &>/dev/null 
+
+    validate_aci_exists $RESOURCE_GROUP $ACI_NAME
+
+    SERVER_IP=$(az container show --resource-group $RESOURCE_GROUP --name $ACI_NAME --query ipAddress.ip --output tsv 2>/dev/null)
+
+    # Create the Client ACI
+    az container create --name ${ACI_NAME}-client \
+    --resource-group $RESOURCE_GROUP --image alpine/curl \
+    --command-line "/bin/sh -c 'while true; do wget -T 5 --spider $SERVER_IP; sleep 2; done'" \
+    --vnet client-vnet-${USER_ALIAS} --subnet client-subnet-${USER_ALIAS} &>/dev/null
+
+    validate_aci_exists $RESOURCE_GROUP $CLIENT_ACI_NAME
+
+    sleep 15
+
+    ERROR_MESSAGE=$(az container logs --resource-group $RESOURCE_GROUP --name $CLIENT_ACI_NAME | tail -3)
+
+    
+    echo -e "\n\n************************************************************************\n"
+    echo -e "\n--> \nIssue description: \n Customer has 2 Container Instances deployed in different Subnets of the same VNet in resource group $RESOURCE_GROUP. However, the Client ACI $CLIENT_ACI_NAME, is not able to access the Server ACI $ACI_NAME.\n"
+
+    echo -e "Cx is getting the error message:"
+    echo -e "\n-------------------------------------------------------------------------------------\n"
+    echo -e "$ERROR_MESSAGE"
+    echo -e "\n-------------------------------------------------------------------------------------\n"
+    echo -e "Check the network configuration of both the Container Instances in resource group $RESOURCE_GROUP, and see why the Client ACI is not able to connect to the Server ACI.\n"
+    echo -e "Once you find the issue, update the network configuration to allow access from Client ACI to Server ACI."
+
+}
+
+function lab_scenario_5_validation () {
+    ACI_NAME=aci-labs-ex${LAB_SCENARIO}-${USER_ALIAS}
+    CLIENT_ACI_NAME=${ACI_NAME}-client
+    RESOURCE_GROUP=aci-labs-ex${LAB_SCENARIO}-rg-${USER_ALIAS}
+    validate_aci_exists $RESOURCE_GROUP $CLIENT_ACI_NAME
+
+    CLIENT_LOGS=$(az container logs --resource-group $RESOURCE_GROUP --name $CLIENT_ACI_NAME | tail -3)
+    if echo $CLIENT_LOGS | grep -i 'remote file exists' &>/dev/null
+    then
+        echo -e "\n\n========================================================"
+        echo -e '\nConnectivity between the 2 Container instances looks good now!\n'
+    else
+        echo -e "\n--> Error: Scenario $LAB_SCENARIO is still FAILED\n\n"
+        echo -e "Check the logs for the Container instance using the \"az container logs -n <aci_name> -g <aci_rg>\". Then, verify the Networking configuration of the Server/Client ACI on the Portal and see if there is any mis-configuration.\n"
+        echo -e "\nHint: Both of the Container Instances are Private, and are deployed inside *different* Virtual Network. Check if there is connectivity between the 2 VNets.\n"
+    fi
+}
+
 #if -h | --help option is selected usage will be displayed
 if [ $HELP -eq 1 ]
 then
@@ -422,9 +495,9 @@ if [ -z $USER_ALIAS ]; then
 fi
 
 # lab scenario has a valid option
-if [[ ! $LAB_SCENARIO =~ ^[1-4]+$ ]];
+if [[ ! $LAB_SCENARIO =~ ^[1-5]+$ ]];
 then
-    echo -e "\n--> Error: invalid value for lab scenario '-l $LAB_SCENARIO'\nIt must be value from 1 to 4\n"
+    echo -e "\n--> Error: invalid value for lab scenario '-l $LAB_SCENARIO'\nIt must be value from 1 to 5\n"
     exit 11
 fi
 
@@ -471,6 +544,15 @@ then
     lab_scenario_4
 
 elif [ $LAB_SCENARIO -eq 4 ] && [ $VALIDATE -eq 1 ]
+then
+    lab_scenario_4_validation
+
+elif [ $LAB_SCENARIO -eq 5 ] && [ $VALIDATE -eq 0 ]
+then
+    check_resourcegroup_cluster
+    lab_scenario_4
+
+elif [ $LAB_SCENARIO -eq 5 ] && [ $VALIDATE -eq 1 ]
 then
     lab_scenario_4_validation
 

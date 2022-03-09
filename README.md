@@ -22,6 +22,7 @@ Here is the list of current labs available:
 *        2. ACI deployed with wrong image
 *        3. ACI not accessible using PublicIP:Port
 *        4. ACI not accessible from another Subnet.
+*        5. ACI not accessible from another VNet.
 *************************************************************************************
 
 "-l|--lab" Lab scenario to deploy (3 possible options)
