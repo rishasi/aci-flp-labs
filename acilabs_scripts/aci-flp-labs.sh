@@ -420,9 +420,9 @@ if [ -z $USER_ALIAS ]; then
 fi
 
 # lab scenario has a valid option
-if [[ ! $LAB_SCENARIO =~ ^[1-3]+$ ]];
+if [[ ! $LAB_SCENARIO =~ ^[1-4]+$ ]];
 then
-    echo -e "\n--> Error: invalid value for lab scenario '-l $LAB_SCENARIO'\nIt must be value from 1 to 3\n"
+    echo -e "\n--> Error: invalid value for lab scenario '-l $LAB_SCENARIO'\nIt must be value from 1 to 4\n"
     exit 11
 fi
 
