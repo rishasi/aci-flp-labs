@@ -358,7 +358,7 @@ function lab_scenario_4 () {
 
     sleep 15
 
-    ERROR_MESSAGE=$(az container logs --resource-group $RESOURCE_GROUP --name $ACI_NAME-client | tail -5)
+    ERROR_MESSAGE=$(az container logs --resource-group $RESOURCE_GROUP --name $ACI_NAME-client | tail -3)
 
     
     echo -e "\n\n************************************************************************\n"
@@ -378,17 +378,15 @@ function lab_scenario_4_validation () {
     RESOURCE_GROUP=aci-labs-ex${LAB_SCENARIO}-rg-${USER_ALIAS}
     validate_aci_exists $RESOURCE_GROUP $ACI_NAME
 
-    UPDATED_PORT=$(az container show -g $RESOURCE_GROUP -n $ACI_NAME --query ipAddress.ports[].port -o tsv)
-    if [ $UPDATED_PORT -eq 80 ]
+    CLIENT_LOGS=$(az container logs --resource-group $RESOURCE_GROUP --name $ACI_NAME-client | tail -3 > client-logs)
+    if echo $CLIENT_LOGS | grep -i 'remote file exists' &>/dev/null
     then
         echo -e "\n\n========================================================"
-        echo -e '\nContainer instance looks good now!\n'
+        echo -e '\nConnectivity between the 2 Container instances looks good now!\n'
     else
         echo -e "\n--> Error: Scenario $LAB_SCENARIO is still FAILED\n\n"
-        echo -e "Check the logs for the Container instance using the \"az container logs -n <aci_name> -g <aci_rg>\". Then, verify the Networking configuration of the Container Instance on the Portal and see if there is any mis-configuration.\n"
-        echo -e "Once you find the issue, update the Constinaer Instance using the command:"
-        echo -e "\n az container create -g <aci_rg> -n <aci_name> --image <aci_image> --ip-address Public --ports <required_port>\n"
-        echo -e "\n Hint: that both of the Container Instances are Private, and are deployed inside a Virtual Network. Link: https://docs.microsoft.com/en-us/azure/container-instances/container-instances-virtual-network-concepts#scenarios\n"
+        echo -e "Check the logs for the Container instance using the \"az container logs -n <aci_name> -g <aci_rg>\". Then, verify the Networking configuration of the Server/Client ACI on the Portal and see if there is any mis-configuration.\n"
+        echo -e "\nHint: that both of the Container Instances are Private, and are deployed inside a Virtual Network. Link: https://docs.microsoft.com/en-us/azure/container-instances/container-instances-virtual-network-concepts#scenarios\n"
     fi
 }
 
