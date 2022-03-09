@@ -351,7 +351,7 @@ function lab_scenario_4 () {
 
     az container create --name $ACI_NAME-client \
     --resource-group $RESOURCE_GROUP --image alpine/curl \
-    --command-line "/bin/sh -c 'while true; do curl --connect-timeout 5 $SERVER_IP; sleep 2; done'" \
+    --command-line "/bin/sh -c 'while true; do wget -T 5 --spider $SERVER_IP; sleep 2; done'" \
     --vnet aci-vnet-${USER_ALIAS} --subnet client-subnet-${USER_ALIAS} &>/dev/null
 
     validate_aci_exists $RESOURCE_GROUP $ACI_NAME-client
