@@ -522,6 +522,93 @@ function lab_scenario_6_validation () {
     fi
 }
 
+
+# Lab scenario 7
+function lab_scenario_7 () {
+    ACI_NAME=aci-labs-ex${LAB_SCENARIO}-${USER_ALIAS}
+    RESOURCE_GROUP=aci-labs-ex${LAB_SCENARIO}-rg-${USER_ALIAS}
+    check_resourcegroup_cluster $RESOURCE_GROUP $ACI_NAME
+
+    echo -e "\n--> Deploying resources for lab${LAB_SCENARIO}...\n"
+
+    # Create VNet and Subnet for ACI
+
+    az network vnet create --name aci-vnet-${USER_ALIAS} --location eastus \
+    --resource-group $RESOURCE_GROUP --address-prefix 10.0.0.0/16 \
+    --subnet-name aci-subnet-${USER_ALIAS} --subnet-prefix 10.0.0.0/24 &>/dev/null 
+
+    # Create Route Table and Custom Route
+
+    az network route-table create --name custom-rtb-${USER_ALIAS} \
+    --resource-group $RESOURCE_GROUP --location eastus &>/dev/null
+
+    az network route-table route create --resource-group $RESOURCE_GROUP \
+    --route-table-name custom-rtb-${USER_ALIAS} -n unwanted-custom-route --next-hop-type VirtualAppliance \
+    --address-prefix 0.0.0.0/0 --next-hop-ip-address 10.0.100.4 &>/dev/null
+
+    # Update Subnet to use the Custom Route Table
+    az network vnet subnet update --name aci-subnet-${USER_ALIAS} \
+    --resource-group $RESOURCE_GROUP --vnet-name aci-vnet-${USER_ALIAS} \
+    --route-table custom-rtb-${USER_ALIAS} &>/dev/null
+
+    # Create Public IP for NAT GW
+    az network public-ip create --name nat-gw-pip-${USER_ALIAS} \
+    --resource-group ${RESOURCE_GROUP} --sku standard \
+    --allocation static &>/dev/null
+
+    # Create NAT GW
+    az network nat gateway create --resource-group $RESOURCE_GROUP \
+    --name nat-gw-${USER_ALIAS} --public-ip-addresses nat-gw-pip-${USER_ALIAS} \
+    --idle-timeout 10 &>/dev/null
+
+    # Update Subnet to use NAT GW
+    az network vnet subnet update --resource-group $RESOURCE_GROUP  \
+    --vnet-name aci-vnet-${USER_ALIAS} --name aci-subnet-${USER_ALIAS} \
+    --nat-gateway nat-gw-${USER_ALIAS} &>/dev/null
+
+    # Create the Server ACI
+    az container create --name $ACI_NAME --resource-group $RESOURCE_GROUP --image nginx \
+    --vnet aci-vnet-${USER_ALIAS} --subnet aci-subnet-${USER_ALIAS} &>/dev/null 
+
+    validate_aci_exists $RESOURCE_GROUP $ACI_NAME
+
+    ERROR=$(az container exec -n $ACI_NAME -g $RESOURCE_GROUP --exec-command "curl --connect-timeout 5 ifconfig.me")
+
+    
+    echo -e "\n\n************************************************************************\n"
+    echo -e "\n--> \nIssue description: \nCustomer has deployed a Container Instances in a VNet in resource group $RESOURCE_GROUP. Cx wants to use a Static Outbound IP for Container Instance, and thus, is trying to use a NAT Gateway for outbound flow, as indicated here: https://docs.microsoft.com/en-in/azure/container-instances/container-instances-nat-gateway\n"
+    echo -e "Customer has successfully deployed the NAT Gateway and added it to the ACI Subnet aci-subnet-${USER_ALIAS}.\n"
+    echo -e "However, customer is having issues in establishing outbound connectivity from the ACI, using NAT Gateway.\n"
+    echo -e "When trying to establish outbound connectivity from within the ACI, customer is getting following error:"
+    echo -e "\n-------------------------------------------------------------------------------------\n"
+    echo -e "$ERROR"
+    echo -e "\n-------------------------------------------------------------------------------------\n"
+    echo -e "Check the network configuration of the Container Instances in resource group $RESOURCE_GROUP, and see why the outbound connectivity is failing.\n"
+    echo -e "Once you find the issue, update the network components to allow oubtound access from Client ACI, and that the Outbound connection uses the NAT Gateway."
+
+}
+
+function lab_scenario_7_validation () {
+    ACI_NAME=aci-labs-ex${LAB_SCENARIO}-${USER_ALIAS}
+    RESOURCE_GROUP=aci-labs-ex${LAB_SCENARIO}-rg-${USER_ALIAS}
+    validate_aci_exists $RESOURCE_GROUP $CLIENT_ACI_NAME
+
+    NG_PUBLIC_IP="$(az network public-ip show --name nat-gw-pip-${USER_ALIAS} \
+    --resource-group $RESOURCE_GROUP --query ipAddress --output tsv)" &>/dev/null
+
+    MESSAGE=$(az container exec -n $ACI_NAME -g $RESOURCE_GROUP --exec-command "curl --connect-timeout 5 ifconfig.me")
+    if if [[ "$MESSAGE" == "$NG_PUBLIC_IP" ]]
+    then
+        echo -e "\n\n========================================================"
+        echo -e '\nOutbound Connectivity from Container Instance looks good now, and is using the NAT Gateway.\n'
+    else
+        echo -e "\n--> Error: Scenario $LAB_SCENARIO is still FAILED\n\n"
+        echo -e "Check the network configuration of the Container Instances in resource group $RESOURCE_GROUP, and see why the outbound connectivity is failing.\n"
+        echo -e "Once you find the issue, update the network components to allow oubtound access from Client ACI, and that the Outbound connection uses the NAT Gateway."
+    fi
+}
+
+
 #if -h | --help option is selected usage will be displayed
 if [ $HELP -eq 1 ]
 then
@@ -552,7 +639,7 @@ if [ -z $USER_ALIAS ]; then
 fi
 
 # lab scenario has a valid option
-if [[ ! $LAB_SCENARIO =~ ^[1-6]+$ ]];
+if [[ ! $LAB_SCENARIO =~ ^[1-7]+$ ]];
 then
     echo -e "\n--> Error: invalid value for lab scenario '-l $LAB_SCENARIO'\nIt must be value from 1 to 6\n"
     exit 11
@@ -621,6 +708,15 @@ then
 elif [ $LAB_SCENARIO -eq 6 ] && [ $VALIDATE -eq 1 ]
 then
     lab_scenario_6_validation
+
+elif [ $LAB_SCENARIO -eq 7 ] && [ $VALIDATE -eq 0 ]
+then
+    check_resourcegroup_cluster
+    lab_scenario_7
+
+elif [ $LAB_SCENARIO -eq 7 ] && [ $VALIDATE -eq 1 ]
+then
+    lab_scenario_7_validation
 
 else
     echo -e "\n--> Error: no valid option provided\n"
