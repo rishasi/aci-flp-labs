@@ -518,7 +518,7 @@ function lab_scenario_6_validation () {
         echo -e "Once you find the issue, update the network configuration so that the ACI creation can be successful. You can remove some components in order for the deployment to succeed. Once the issue is resolved, create the ACI using the command: \n\taz container create --name $ACI_NAME --resource-group $RESOURCE_GROUP --image mcr.microsoft.com/azuredocs/aci-helloworld --vnet aci-vnet-${USER_ALIAS} --subnet aci-subnet-${USER_ALIAS}"       
     else
         echo -e "\n\n========================================================"
-        echo -e '\nContainer instances looks good now!\n'
+        echo -e '\n\e[38;5;82m Container instances looks good now! \e[0m\n'
     fi
 }
 
@@ -597,7 +597,7 @@ function lab_scenario_7_validation () {
     --resource-group $RESOURCE_GROUP --query ipAddress --output tsv)" &>/dev/null
 
     MESSAGE=$(az container exec -n $ACI_NAME -g $RESOURCE_GROUP --exec-command "curl --connect-timeout 5 ifconfig.me")
-    if if [[ "$MESSAGE" == "$NG_PUBLIC_IP" ]]
+    if [[ "$MESSAGE" == "$NG_PUBLIC_IP" ]]
     then
         echo -e "\n\n========================================================"
         echo -e '\nOutbound Connectivity from Container Instance looks good now, and is using the NAT Gateway.\n'
