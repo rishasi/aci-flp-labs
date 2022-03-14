@@ -518,7 +518,7 @@ function lab_scenario_6_validation () {
         echo -e "Once you find the issue, update the network configuration so that the ACI creation can be successful. You can remove some components in order for the deployment to succeed. Once the issue is resolved, create the ACI using the command: \n\taz container create --name $ACI_NAME --resource-group $RESOURCE_GROUP --image mcr.microsoft.com/azuredocs/aci-helloworld --vnet aci-vnet-${USER_ALIAS} --subnet aci-subnet-${USER_ALIAS}"       
     else
         echo -e "\n\n========================================================"
-        echo -e '\n\e[38;5;82m Container instances looks good now! \e[0m\n'
+        echo -e '\nContainer instances looks good now!\n'
     fi
 }
 
@@ -641,7 +641,7 @@ fi
 # lab scenario has a valid option
 if [[ ! $LAB_SCENARIO =~ ^[1-7]+$ ]];
 then
-    echo -e "\n--> Error: invalid value for lab scenario '-l $LAB_SCENARIO'\nIt must be value from 1 to 6\n"
+    echo -e "\n--> Error: invalid value for lab scenario '-l $LAB_SCENARIO'\nIt must be value from 1 to 7\n"
     exit 11
 fi
 
