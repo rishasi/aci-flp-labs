@@ -554,12 +554,12 @@ function lab_scenario_7 () {
     # Create Public IP for NAT GW
     az network public-ip create --name nat-gw-pip-${USER_ALIAS} \
     --resource-group ${RESOURCE_GROUP} --sku standard \
-    --allocation static &>/dev/null
+    --allocation static --location eastus &>/dev/null
 
     # Create NAT GW
     az network nat gateway create --resource-group $RESOURCE_GROUP \
     --name nat-gw-${USER_ALIAS} --public-ip-addresses nat-gw-pip-${USER_ALIAS} \
-    --idle-timeout 10 &>/dev/null
+    --idle-timeout 10 --location eastus &>/dev/null
 
     # Update Subnet to use NAT GW
     az network vnet subnet update --resource-group $RESOURCE_GROUP  \
@@ -568,7 +568,7 @@ function lab_scenario_7 () {
 
     # Create the Server ACI
     az container create --name $ACI_NAME --resource-group $RESOURCE_GROUP --image nginx \
-    --vnet aci-vnet-${USER_ALIAS} --subnet aci-subnet-${USER_ALIAS} &>/dev/null 
+    --vnet aci-vnet-${USER_ALIAS} --subnet aci-subnet-${USER_ALIAS} --location eastus &>/dev/null 
 
     validate_aci_exists $RESOURCE_GROUP $ACI_NAME
 
