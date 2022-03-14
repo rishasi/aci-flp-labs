@@ -465,6 +465,65 @@ function lab_scenario_5_validation () {
     fi
 }
 
+
+# Lab scenario 6
+function lab_scenario_6 () {
+    ACI_NAME=aci-labs-ex${LAB_SCENARIO}-${USER_ALIAS}
+    RESOURCE_GROUP=aci-labs-ex${LAB_SCENARIO}-rg-${USER_ALIAS}
+    check_resourcegroup_cluster $RESOURCE_GROUP $ACI_NAME
+
+    for i in {1..15} {15..1} ; do echo -en "\e[48;5;${i}m \e[0m" ; done
+    echo -e "\e[38;5;82mBold Deploying resources for lab${LAB_SCENARIO}...\e[0m"
+    for i in {1..15} {15..1} ; do echo -en "\e[48;5;${i}m \e[0m" ; done
+
+    # Create VNet and Subnet for ACI
+    az network vnet create --name aci-vnet-${USER_ALIAS} \
+    --resource-group $RESOURCE_GROUP --address-prefix 10.0.0.0/16 \
+    --subnet-name aci-subnet-${USER_ALIAS} --subnet-prefix 10.0.0.0/24 &>/dev/null 
+
+    # Create a NIC in the Subnet
+    az network nic create --resource-group $RESOURCE_GROUP \
+    --vnet-name aci-vnet-${USER_ALIAS} --subnet aci-subnet-${USER_ALIAS} \
+    --name unwanted-nic &>/dev/null
+
+    # Create the ACI. This will fail as the Subnet already contains the NIC.
+    az container create --name $ACI_NAME \
+    --resource-group $RESOURCE_GROUP --image mcr.microsoft.com/azuredocs/aci-helloworld \
+    --vnet aci-vnet-${USER_ALIAS} --subnet aci-subnet-${USER_ALIAS} &>/dev/null 
+
+    sleep 15
+
+    ERROR_MESSAGE=SubnetDelegationsCannotChange
+
+    
+    echo -e "\n\n************************************************************************\n"
+    echo -e "\n--> \nIssue description: \nCustomer is trying to create a Container Instance in resource group $RESOURCE_GROUP. However, ACI creation is failing.\n"
+
+    echo -e "Cx is getting the error message:"
+    echo -e "\n-------------------------------------------------------------------------------------\n"
+    echo -e "\e[38;5;198mBold $ERROR_MESSAGE \e[0m"
+    echo -e "\n-------------------------------------------------------------------------------------\n"
+    echo -e "Check the network configuration of the Container Instances in resource group $RESOURCE_GROUP, and see why the ACI creation is failing. You could check the Kusto Queries for ACI failed deployments, or check the Activity Logs of the Resource Group to get more information on the error.\n"
+    echo -e "Once you find the issue, update the network configuration so that the ACI creation can be successful. You can remove some components in order for the deployment to succeed. Once the issue is resolved, create the ACI using the command: \n\taz container create --name $ACI_NAME --resource-group $RESOURCE_GROUP --image mcr.microsoft.com/azuredocs/aci-helloworld --vnet aci-vnet-${USER_ALIAS} --subnet aci-subnet-${USER_ALIAS}"
+
+}
+
+function lab_scenario_6_validation () {
+    ACI_NAME=aci-labs-ex${LAB_SCENARIO}-${USER_ALIAS}
+    RESOURCE_GROUP=aci-labs-ex${LAB_SCENARIO}-rg-${USER_ALIAS}
+    ACI_EXIST=$(az container show -g $RESOURCE_GROUP -n $ACI_NAME &>/dev/null; echo $?)
+
+    if [ $ACI_EXIST -ne 0 ]
+    then
+        echo -e "\n--> Error: Scenario $LAB_SCENARIO is still \e[38;5;198mBold FAILED \e[0m\n\n"
+        echo -e "Check the network configuration of the Container Instances in resource group $RESOURCE_GROUP, and see why the ACI creation is failing. You could check the Kusto Queries for ACI failed deployments, or check the Activity Logs of the Resource Group to get more information on the error.\n"
+        echo -e "Once you find the issue, update the network configuration so that the ACI creation can be successful. You can remove some components in order for the deployment to succeed. Once the issue is resolved, create the ACI using the command: \n\taz container create --name $ACI_NAME --resource-group $RESOURCE_GROUP --image mcr.microsoft.com/azuredocs/aci-helloworld --vnet aci-vnet-${USER_ALIAS} --subnet aci-subnet-${USER_ALIAS}"       
+    else
+        echo -e "\n\n========================================================"
+        echo -e '\n\e[38;5;82mBold Container instances looks good now! \e[0m\n'
+    fi
+}
+
 #if -h | --help option is selected usage will be displayed
 if [ $HELP -eq 1 ]
 then
@@ -495,9 +554,9 @@ if [ -z $USER_ALIAS ]; then
 fi
 
 # lab scenario has a valid option
-if [[ ! $LAB_SCENARIO =~ ^[1-5]+$ ]];
+if [[ ! $LAB_SCENARIO =~ ^[1-6]+$ ]];
 then
-    echo -e "\n--> Error: invalid value for lab scenario '-l $LAB_SCENARIO'\nIt must be value from 1 to 5\n"
+    echo -e "\n--> Error: invalid value for lab scenario '-l $LAB_SCENARIO'\nIt must be value from 1 to 6\n"
     exit 11
 fi
 
@@ -555,6 +614,15 @@ then
 elif [ $LAB_SCENARIO -eq 5 ] && [ $VALIDATE -eq 1 ]
 then
     lab_scenario_5_validation
+
+elif [ $LAB_SCENARIO -eq 6 ] && [ $VALIDATE -eq 0 ]
+then
+    check_resourcegroup_cluster
+    lab_scenario_6
+
+elif [ $LAB_SCENARIO -eq 6 ] && [ $VALIDATE -eq 1 ]
+then
+    lab_scenario_6_validation
 
 else
     echo -e "\n--> Error: no valid option provided\n"
