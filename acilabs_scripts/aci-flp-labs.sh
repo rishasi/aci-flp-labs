@@ -567,12 +567,15 @@ function lab_scenario_7 () {
     --nat-gateway nat-gw-${USER_ALIAS} &>/dev/null
 
     # Create the Server ACI
-    az container create --name $ACI_NAME --resource-group $RESOURCE_GROUP --image nginx \
-    --vnet aci-vnet-${USER_ALIAS} --subnet aci-subnet-${USER_ALIAS} --location eastus &>/dev/null 
+    az container create --resource-group $RESOURCE_GROUP \
+    --name $ACI_NAME --image mcr.microsoft.com/azuredocs/aci-tutorial-sidecar \
+    --command-line "curl -s http://checkip.dyndns.org" --restart-policy OnFailure \
+    --vnet aci-vnet-${USER_ALIAS} --subnet aci-subnet-${USER_ALIAS} \
+    --location eastus
 
     validate_aci_exists $RESOURCE_GROUP $ACI_NAME
 
-    ERROR=$(az container exec -n $ACI_NAME -g $RESOURCE_GROUP --exec-command "curl --connect-timeout 5 ifconfig.me")
+    ERROR=$(az container logs -n $ACI_NAME -g $RESOURCE_GROUP)
 
     
     echo -e "\n\n************************************************************************\n"
@@ -596,8 +599,14 @@ function lab_scenario_7_validation () {
     NG_PUBLIC_IP="$(az network public-ip show --name nat-gw-pip-${USER_ALIAS} \
     --resource-group $RESOURCE_GROUP --query ipAddress --output tsv)" &>/dev/null
 
-    MESSAGE=$(az container exec -n $ACI_NAME -g $RESOURCE_GROUP --exec-command "curl --connect-timeout 5 ifconfig.me")
-    if [[ "$MESSAGE" == "$NG_PUBLIC_IP" ]]
+    az container create --resource-group $RESOURCE_GROUP \
+    --name $ACI_NAME --image mcr.microsoft.com/azuredocs/aci-tutorial-sidecar \
+    --command-line "curl -s http://checkip.dyndns.org" --restart-policy OnFailure \
+    --vnet aci-vnet-${USER_ALIAS} --subnet aci-subnet-${USER_ALIAS} \
+    --location eastus
+
+    MESSAGE=$(az container logs -n $ACI_NAME -g $RESOURCE_GROUP)
+    if echo $MESSAGE | grep -i $NG_PUBLIC_IP &>/dev/null
     then
         echo -e "\n\n========================================================"
         echo -e '\nOutbound Connectivity from Container Instance looks good now, and is using the NAT Gateway.\n'
