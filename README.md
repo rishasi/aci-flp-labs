@@ -25,6 +25,7 @@ Here is the list of current labs available:
 *        5. ACI not accessible from another VNet.
 *        6. ACI cannot be deployed in a Subnet.
 *        7. Outbound Connectivity not using NAT Gateway.
+*
 *************************************************************************************
 
 "-l|--lab" Lab scenario to deploy (3 possible options)
