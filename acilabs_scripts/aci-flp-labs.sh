@@ -569,9 +569,9 @@ function lab_scenario_7 () {
     sleep 15
 
     # Update Subnet to use NAT GW
-    az network vnet subnet update --resource-group $RESOURCE_GROUP  \
-    --vnet-name aci-vnet-${USER_ALIAS} --name aci-subnet-${USER_ALIAS} \
-    --nat-gateway nat-gw-${USER_ALIAS} &>/dev/null
+    # az network vnet subnet update --resource-group $RESOURCE_GROUP  \
+    # --vnet-name aci-vnet-${USER_ALIAS} --name aci-subnet-${USER_ALIAS} \
+    # --nat-gateway nat-gw-${USER_ALIAS} &>/dev/null
 
     validate_aci_exists $RESOURCE_GROUP $ACI_NAME
     
@@ -606,13 +606,13 @@ function lab_scenario_7_validation () {
     then
         echo -e "\n\n========================================================"
         echo -e '\nOutbound Connectivity from Container Instance looks good now, and is using the NAT Gateway.\n'
-        az container delete --name $VALIDATION_ACI_NAME --resource-group $RESOURCE_GROUP
+        az container delete --name $VALIDATION_ACI_NAME --resource-group $RESOURCE_GROUP --yes &>/dev/null
         
     else
         echo -e "\n--> Error: Scenario $LAB_SCENARIO is still FAILED\n\n"
         echo -e "Check the network configuration of the Container Instances in resource group $RESOURCE_GROUP, and see why the outbound connectivity is failing.\n"
         echo -e "Once you find the issue, update the network components to allow oubtound access from Client ACI, and that the Outbound connection uses the NAT Gateway."
-       az container delete --name $VALIDATION_ACI_NAME --resource-group $RESOURCE_GROUP
+       az container delete --name $VALIDATION_ACI_NAME --resource-group $RESOURCE_GROUP --yes &>/dev/null
     fi
 }
 
