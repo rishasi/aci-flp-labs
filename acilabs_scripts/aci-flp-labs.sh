@@ -590,7 +590,7 @@ function lab_scenario_7_validation () {
     
     VALIDATION_ACI_NAME=validation-aci-ex${LAB_SCENARIO}-${USER_ALIAS}
     RESOURCE_GROUP=aci-labs-ex${LAB_SCENARIO}-rg-${USER_ALIAS}
-    validate_aci_exists $RESOURCE_GROUP $VALIDATION_ACI_NAME
+    # validate_aci_exists $RESOURCE_GROUP $VALIDATION_ACI_NAME
 
     NG_PUBLIC_IP="$(az network public-ip show --name nat-gw-pip-${USER_ALIAS} \
     --resource-group $RESOURCE_GROUP --query ipAddress --output tsv)" &>/dev/null
