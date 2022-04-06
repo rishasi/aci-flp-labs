@@ -289,8 +289,19 @@ function lab_scenario_3_validation () {
     RESOURCE_GROUP=aci-labs-ex${LAB_SCENARIO}-rg-${USER_ALIAS}
     validate_aci_exists $RESOURCE_GROUP $ACI_NAME
 
-    UPDATED_PORT=$(az container show -g $RESOURCE_GROUP -n $ACI_NAME --query ipAddress.ports[].port -o tsv)
-    if [ $UPDATED_PORT -eq 80 ]
+    # UPDATED_PORT=$(az container show -g $RESOURCE_GROUP -n $ACI_NAME --query ipAddress.ports[].port -o tsv)
+    az container show -g $RESOURCE_GROUP -n $ACI_NAME --query ipAddress.ports[].port -o tsv > updated_ports.tsv
+
+    for PORTS in $(cut -f1 updated_ports.tsv)
+    do
+      if [ $PORTS -eq 80 ]
+        then 
+          IS_PORT_CORRECT=true
+      fi
+    done
+
+
+    if [ $IS_PORT_CORRECT ]
     then
         echo -e "\n\n========================================================"
         echo -e '\nContainer instance looks good now!\n'
