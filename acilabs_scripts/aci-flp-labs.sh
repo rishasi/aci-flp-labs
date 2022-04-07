@@ -280,7 +280,7 @@ function lab_scenario_3 () {
     echo -e "\n-------------------------------------------------------------------------------------\n"
     echo -e "Check the logs for the Container instance using the \"az container logs -n <aci_name> -g <aci_rg>\". Then, verify the Networking configuration of the Container Instance on the Portal and see if there is any mis-configuration.\n"
     echo -e "Once you find the issue, update the Constinaer Instance using the command:"
-    echo -e "\naz container create -g <aci_rg> -n <aci_name> --image <aci_image> --ports <required_port>\n"
+    echo -e "\naz container create -g <aci_rg> -n <aci_name> --image <aci_image> --ports <required_port> --ip-address Public\n"
     echo -e "\nNote that in order to update a specific property of an existing Container Instance, all other properties should be same. For reference: https://docs.microsoft.com/en-us/azure/container-instances/container-instances-update#update-a-container-group\n"
 }
 
@@ -309,7 +309,7 @@ function lab_scenario_3_validation () {
         echo -e "\n--> Error: Scenario $LAB_SCENARIO is still FAILED\n\n"
         echo -e "Check the logs for the Container instance using the \"az container logs -n <aci_name> -g <aci_rg>\". Then, verify the Networking configuration of the Container Instance on the Portal and see if there is any mis-configuration.\n"
         echo -e "Once you find the issue, update the Constinaer Instance using the command:"
-        echo -e "\n az container create -g <aci_rg> -n <aci_name> --image <aci_image> --ip-address Public --ports <required_port>\n"
+        echo -e "\n az container create -g <aci_rg> -n <aci_name> --image <aci_image> --ip-address Public --ports <required_port> --ip-address Public\n"
         echo -e "\n Note that in order to update a specific property of an existing Container Instance, all other properties should be same. For reference: https://docs.microsoft.com/en-us/azure/container-instances/container-instances-update#update-a-container-group\n"
     fi
 }
